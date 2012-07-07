@@ -244,7 +244,6 @@ class I < Scrivener
   end
 end
 
-
 scope do
   test "equality validation" do
     filter = I.new({})
@@ -264,5 +263,55 @@ scope do
     filter = I.new(a: "foo", b: 42)
     filter.valid?
     assert filter.valid?
+  end
+end
+
+class Thing < Scrivener
+  attribute :name
+  attribute :ends_on, Types::Date
+  attribute :price,   Types::Decimal
+
+  def validate
+    assert_present :ends_on
+  end
+end
+
+class OtherThing < Scrivener
+  attribute :foo, ->(val) { val.to_s.reverse }
+end
+
+scope do
+  test "casting to types" do
+    t = Thing.new(name: "Foo", ends_on: "2012-07-31", price: "20.45")
+
+    assert_equal "Foo",                 t.name
+    assert_equal Date.new(2012, 7, 31), t.ends_on
+    assert_equal BigDecimal("20.45"),   t.price
+  end
+
+  test "#attributes includes the parsed objects" do
+    t = Thing.new(name: "Foo", ends_on: "2012-07-31", price: "20.45")
+
+    assert_equal "Foo",                 t.attributes[:name]
+    assert_equal Date.new(2012, 7, 31), t.attributes[:ends_on]
+    assert_equal BigDecimal("20.45"),   t.attributes[:price]
+  end
+
+  test "casting with a proc" do
+    t = OtherThing.new(foo: "simple")
+    assert_equal "elpmis", t.foo
+  end
+
+  test "casting invalid values adds an error" do
+    t = Thing.new(ends_on: "this is not a date")
+
+    assert !t.valid?
+    assert_equal [:typecast], t.errors[:ends_on]
+    assert_equal "this is not a date", t.ends_on
+  end
+
+  test "accepts input with the correct type" do
+    t = Thing.new(name: "Foo", ends_on: Date.new(2012, 7, 31), price: BigDecimal("10.00"))
+    assert t.valid?
   end
 end

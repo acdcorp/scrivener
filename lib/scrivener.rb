@@ -1,9 +1,11 @@
 require_relative "scrivener/validations"
+require_relative "scrivener/types"
 
 class Scrivener
   VERSION = "1.0.0"
 
   include Validations
+  extend Types
 
   # Initialize with a hash of attributes and values.
   # Extra attributes are discarded.
