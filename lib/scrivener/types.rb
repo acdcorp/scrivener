@@ -1,6 +1,5 @@
 require "time"
 require "date"
-require "bigdecimal"
 
 class Scrivener
   # Provides a way to define attributes so they are cast into a corresponding
