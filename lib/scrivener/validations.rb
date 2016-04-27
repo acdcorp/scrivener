@@ -118,13 +118,22 @@ class Scrivener
     def assert_numeric(att, error = [att, :not_numeric])
       if assert_present(att, error)
         value = send(att)
-        assert(value.respond_to?(:to_int) || value.to_s.match(/\A\-?\d+\z/), error)
+
+        if RUBY_ENGINE == 'opal'
+          assert(value.respond_to?(:to_int) || value.to_s.match(/^\-?\d+$/), error)
+        else
+          assert(value.respond_to?(:to_int) || value.to_s.match(/\A\-?\d+\z/), error)
+        end
       end
     end
 
-    URL = /\A(http|https):\/\/([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,12}|(2
-          5[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}
-          |localhost)(:[0-9]{1,5})?(\/.*)?\z/ix
+    if RUBY_ENGINE == 'opal'
+      URL = /^(http|https):\/\/([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,12}|(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}|localhost)(:[0-9]{1,5})?(\/.*)?$/i
+    else
+      URL = /\A(http|https):\/\/([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,12}|(2
+            5[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}
+            |localhost)(:[0-9]{1,5})?(\/.*)?\z/ix
+    end
 
     def assert_url(att, error = [att, :not_url])
       if assert_present(att, error)
@@ -132,10 +141,15 @@ class Scrivener
       end
     end
 
-    EMAIL = /\A([\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*
-            [\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+@
-            ((((([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+
-            [a-z]{2,12})|(\d{1,3}\.){3}\d{1,3}(\:\d{1,5})?)\z/ix
+
+    if RUBY_ENGINE == 'opal'
+      EMAIL = /^([\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*[\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+@((((([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+[a-z]{2,12})|(\d{1,3}\.){3}\d{1,3}(\:\d{1,5})?)$/i
+    else
+      EMAIL = /\A([\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*
+              [\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+@
+              ((((([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+
+              [a-z]{2,12})|(\d{1,3}\.){3}\d{1,3}(\:\d{1,5})?)\z/ix
+    end
 
     def assert_email(att, error = [att, :not_email])
       if assert_present(att, error)
@@ -154,7 +168,11 @@ class Scrivener
       end
     end
 
-    DECIMAL = /\A\-?(\d+)?(\.\d+(E\d+)?)?\z/
+    if RUBY_ENGINE == 'opal'
+      DECIMAL = /^\-?(\d+)?(\.\d+(E\d+)?)$/
+    else
+      DECIMAL = /\A\-?(\d+)?(\.\d+(E\d+)?)?\z/
+    end
 
     def assert_decimal(att, error = [att, :not_decimal])
       assert_format att, DECIMAL, error
