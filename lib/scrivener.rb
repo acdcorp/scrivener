@@ -2,10 +2,15 @@ require_relative "scrivener/validations"
 require_relative "scrivener/types"
 
 class Scrivener
-  VERSION = "1.0.1"
+  VERSION = "1.0.2"
 
   include Validations
   extend Types
+
+  # This will allow you to inhreit from other Scrivener classes
+  def self.inherited(sub_class)
+    sub_class.send(:attr_accessor, *instance_methods(false).select { |m| !m['='] }) unless self.name == 'Scrivener'
+  end
 
   # Initialize with a hash of attributes and values.
   # Extra attributes are discarded.
